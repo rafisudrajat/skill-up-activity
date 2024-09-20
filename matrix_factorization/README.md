@@ -4,6 +4,5 @@ In this project I implemented matrix factorization algorithm for recommender sys
 
 TO DO:
 
-1. Make the notebook modular
-2. Visualize the training result
-3. Create simple demo
+1. Visualize the training result
+2. Create simple demo for inference
