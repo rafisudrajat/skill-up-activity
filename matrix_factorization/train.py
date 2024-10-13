@@ -39,9 +39,10 @@ def train_model(net:MF,dataloaders:dict[str,DataLoader],dataset_sizes:dict[str,i
     # Create a temporary directory to save training checkpoints
     with TemporaryDirectory() as tempdir:
         best_model_params_path = os.path.join(tempdir, 'best_model_params.pt')
+        criterion = nn.MSELoss(reduction='sum')
 
         torch.save(net.state_dict(),best_model_params_path)
-        best_loss = 99999999999
+        best_loss = float('inf')
         for epoch in range(num_epochs):
             print(f'Epoch {epoch}/{num_epochs - 1}')
             print('-' * 10)
@@ -67,17 +68,16 @@ def train_model(net:MF,dataloaders:dict[str,DataLoader],dataset_sizes:dict[str,i
                     # track history if only in train
                     with torch.set_grad_enabled(phase=='train'):
                         outputs = net(user_batch,item_batch)
-                        # apply RMSE as loss function
-                        criterion = nn.MSELoss()
-                        loss = torch.sqrt(criterion(outputs, rating_batch))
+                        # apply MSE as loss function
+                        mse_loss = criterion(outputs, rating_batch)
 
                         # backward + optimize only if in training phase
                         if phase == 'train':
-                            loss.backward()
+                            mse_loss.backward()
                             optimizer.step()
 
                     # statistics
-                    running_loss += loss.item() * user_batch.size(0)
+                    running_loss += mse_loss.item()
                 
                 if phase == 'train':
                     scheduler.step()
