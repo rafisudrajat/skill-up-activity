@@ -34,7 +34,7 @@ class AutoRecItemBased(nn.Module):
         torch.Tensor
             The output tensor with shape (batch_size, num_users).
         """
-        hidden = self.dropout(torch.relu(self.encoder(input)))
-        pred = self.decoder(hidden)
+        hidden = self.dropout(torch.sigmoid(self.encoder(input)))
+        pred = torch.relu(self.decoder(hidden))
         return pred
         
