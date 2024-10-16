@@ -5,6 +5,7 @@ from tempfile import TemporaryDirectory
 import time
 import os
 from torch import nn
+import logging
 
 def train_model_item_based(net:AutoRecItemBased,dataloaders:dict[str,DataLoader],dataset_sizes:dict[str,int],device:torch.device,optimizer:torch.optim.Optimizer,scheduler,num_epochs:int=25)->AutoRecItemBased:
     """
@@ -37,6 +38,10 @@ def train_model_item_based(net:AutoRecItemBased,dataloaders:dict[str,DataLoader]
     AutoRecItemBased
         The trained AutoRecItemBased model with the best validation loss.
     """
+    # Setup logger
+    logging.basicConfig(filename='training.log', level=logging.INFO)
+    logger = logging.getLogger()
+
     since = time.time()
 
     # Create a temporary directory to save training checkpoints
@@ -47,8 +52,8 @@ def train_model_item_based(net:AutoRecItemBased,dataloaders:dict[str,DataLoader]
         torch.save(net.state_dict(),best_model_params_path)
         best_loss = float('inf')
         for epoch in range(num_epochs):
-            print(f'Epoch {epoch}/{num_epochs - 1}')
-            print('-' * 10)
+            logger.info(f'Epoch {epoch}/{num_epochs - 1}')
+            logger.info('-' * 10)
             # Each epoch has a training and validation phase
             for phase in ['train', 'val']:
                 if phase == 'train':
@@ -88,16 +93,18 @@ def train_model_item_based(net:AutoRecItemBased,dataloaders:dict[str,DataLoader]
                     scheduler.step()
 
                 epoch_loss = running_loss / dataset_sizes[phase]
-                print(f'{phase} Loss: {epoch_loss:.4f}')
+                logger.info(f'{phase} Loss: {epoch_loss:.4f}')
 
                 # deep copy the model
                 if phase == 'val' and epoch_loss < best_loss:
                     best_loss = epoch_loss
                     torch.save(net.state_dict(), best_model_params_path)
-            print()
+            logger.info('')
         time_elapsed = time.time() - since
         print(f'Training complete in {time_elapsed // 60:.0f}m {time_elapsed % 60:.0f}s')
         print(f'Best loss: {best_loss:4f}')
+        logger.info(f'Training complete in {time_elapsed // 60:.0f}m {time_elapsed % 60:.0f}s')
+        logger.info(f'Best loss: {best_loss:4f}')
 
         # load best model weights
         net.load_state_dict(torch.load(best_model_params_path, weights_only=True))
