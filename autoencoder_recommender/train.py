@@ -75,11 +75,11 @@ def train_model_item_based(net:AutoRecItemBased,dataloaders:dict[str,DataLoader]
                     # forward
                     # track history if only in train
                     with torch.set_grad_enabled(phase=='train'):
-                        outputs = net(user_item_inter_mat)
+                        outputs = net(user_item_inter_mat * mask)
                         masked_outputs = outputs * mask
 
                         # apply MSE as loss function
-                        mse_loss = criterion(masked_outputs, user_item_inter_mat)
+                        mse_loss = criterion(masked_outputs, user_item_inter_mat * mask)
                         
                         # backward + optimize only if in training phase
                         if phase == 'train':

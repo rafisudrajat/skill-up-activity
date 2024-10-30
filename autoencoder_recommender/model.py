@@ -16,8 +16,8 @@ class AutoRecItemBased(nn.Module):
             The dropout rate. Default is 0.05.
         """
         super(AutoRecItemBased, self).__init__()
-        self.encoder = nn.Linear(num_users,num_hidden)
-        self.decoder = nn.Linear(num_hidden, num_users)
+        self.encoder = nn.Linear(num_users,num_hidden, bias=True)
+        self.decoder = nn.Linear(num_hidden, num_users, bias=True)
         self.dropout = nn.Dropout(dropout)
 
     def forward(self, input: torch.Tensor) -> torch.Tensor:
