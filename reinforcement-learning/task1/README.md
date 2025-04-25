@@ -10,8 +10,22 @@ In this project we will try to find the state value of a policy for a robot expl
 
 ## First policy:
 
-![first policy](./img/policy1.png)
+<img src="./img/policy1.png" alt="drawing" width="300"/>
+
+
+The state value of first policy can be seen on the image below:
+
+<img src="./img/policy-sol.png" alt="drawing" width="300"/>
 
 ## Second policy:
 
-![second policy](./img/policy2.png)
+<img src="./img/policy2.png" alt="drawing" width="300"/>
+
+The state value of second policy can be seen on the image below:
+
+<img src="./img/policy-sol.png" alt="drawing" width="300"/>
+
+Note that the state values of the two policies are the same,
+but the two policies are different at the top two states in the fourth column.
+
+
