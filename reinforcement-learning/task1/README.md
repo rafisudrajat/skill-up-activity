@@ -15,7 +15,7 @@ In this project we will try to find the state value of a policy for a robot expl
 
 The state value of first policy can be seen on the image below:
 
-<img src="./img/policy-sol.png" alt="drawing" width="300"/>
+<img src="./img/policy1-2-sol.png" alt="drawing" width="300"/>
 
 ## Second policy:
 
@@ -23,9 +23,16 @@ The state value of first policy can be seen on the image below:
 
 The state value of second policy can be seen on the image below:
 
-<img src="./img/policy-sol.png" alt="drawing" width="300"/>
+<img src="./img/policy1-2-sol.png" alt="drawing" width="300"/>
 
 Note that the state values of the two policies are the same,
 but the two policies are different at the top two states in the fourth column.
 
+## Third policy:
+
+<img src="./img/policy3.png" alt="drawing" width="300"/>
+
+The state value of second policy can be seen on the image below:
+
+<img src="./img/policy3-sol.png" alt="drawing" width="300"/>
 
