@@ -18,7 +18,7 @@ $$ q^*(s,a) = \sum_{r \in \mathcal{R}} p(r|s,a) r + \gamma \sum_{s' \in \mathcal
 
 In matrix form, q-values in BOE can be expressed as
 
-$$ \text{vec}(Q^*) = \text{vec}(R) + \gamma P v^*, \quad Q^*, R \in \mathbb{R}^{|\mathcal{S}| \times |\mathcal{A}|},\ P \in \mathbb{R}^{|\mathcal{S}| \times |\mathcal{A}| \times |\mathcal{S}|} \qquad (4) $$
+$$ \text{vec}(Q^*) = \text{vec}(R) + \gamma P v^*, \quad Q^*, R \in \mathbb{R}^{|\mathcal{S}| \times |\mathcal{A}|},\ P \in \mathbb{R}^{(|\mathcal{S}| \times |\mathcal{A}|) \times |\mathcal{S}|} \qquad (4) $$
 
 $$ R(s,a) \doteq \sum_{r \in \mathcal{R}} p(r|s,a) r, \quad P(s'|s,a) \doteq p(s'|s,a) $$
 
