@@ -264,7 +264,7 @@ if __name__ == "__main__":
     # Calculate the elapsed time
     elapsed_time = end_time - start_time
     # Print the elapsed time
-    print(f"Elapsed time: {elapsed_time:.2f} seconds")
+    print(f"Elapsed time for value iteration: {elapsed_time:.4f} seconds")
 
     # Print the optimal values and policies
     print("Optimal Values:")
