@@ -168,35 +168,36 @@ def value_iteration(all_states: List[Tuple[int, int]],
                        for reward_key in rewards)
             return result
     
+    # [P]_{(s,a),s^{\prime}} \doteq p(s^{\prime}|s,a)
+    # where P is the transition probability matrix, s is the current state, a is the action taken, and s' is the next state.
+    # Example for 2 states and 2 actions:
+    # P[0][0] = p(s0|s0,a0)
+    # P[0][1] = p(s1|s0,a0)
+    # P[1][0] = p(s0|s0,a1)
+    # P[1][1] = p(s1|s0,a1)
+    # P[2][0] = p(s0|s1,a0)
+    # P[2][1] = p(s1|s1,a0)
+    # P[3][0] = p(s0|s1,a1)
+    # P[3][1] = p(s1|s1,a1)
+    transition_probability_matrix = [[transition_probability(state, action, next_state, grid_height, grid_width) for next_state in all_states] 
+        for state in all_states for action in actions]
+
+    transition_probability_matrix = np.array(transition_probability_matrix)
+
+    # [R]_{s,a} \doteq \sum_{r \in \mathcal{R}} p(r|s,a) r
+    # where R is the reward matrix, s is the current state, a is the action taken, and r is the reward.
+    # Example for 2 states and 2 actions:
+    # R[0][0] = r(s0,a0)
+    # R[0][1] = r(s0,a1)
+    # R[1][0] = r(s1,a0)
+    # R[1][1] = r(s1,a1)
+    rewards_matrix = [[sum_of_rewards(state, action) for action in actions] 
+                            for state in all_states]
+    
+    rewards_vector = np.array(rewards_matrix).flatten()
+        
+    
     for _ in range(max_iter):
-
-        # [P]_{(s,a),s^{\prime}} \doteq p(s^{\prime}|s,a)
-        # where P is the transition probability matrix, s is the current state, a is the action taken, and s' is the next state.
-        # Example for 2 states and 2 actions:
-        # P[0][0] = p(s0|s0,a0)
-        # P[0][1] = p(s1|s0,a0)
-        # P[1][0] = p(s0|s0,a1)
-        # P[1][1] = p(s1|s0,a1)
-        # P[2][0] = p(s0|s1,a0)
-        # P[2][1] = p(s1|s1,a0)
-        # P[3][0] = p(s0|s1,a1)
-        # P[3][1] = p(s1|s1,a1)
-        transition_probability_matrix = [[transition_probability(state, action, next_state, grid_height, grid_width) for next_state in all_states] 
-            for state in all_states for action in actions]
-
-        transition_probability_matrix = np.array(transition_probability_matrix)
-        
-        # [R]_{s,a} \doteq \sum_{r \in \mathcal{R}} p(r|s,a) r
-        # where R is the reward matrix, s is the current state, a is the action taken, and r is the reward.
-        # Example for 2 states and 2 actions:
-        # R[0][0] = r(s0,a0)
-        # R[0][1] = r(s0,a1)
-        # R[1][0] = r(s1,a0)
-        # R[1][1] = r(s1,a1)
-        rewards_matrix = [[sum_of_rewards(state, action) for action in actions] 
-                                for state in all_states]
-        
-        rewards_vector = np.array(rewards_matrix).flatten()
 
         value_states_vector = np.array(list(value_states.values()))
 
