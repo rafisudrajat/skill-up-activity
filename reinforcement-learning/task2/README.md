@@ -14,7 +14,7 @@ In matrix form, the above equation can be written as
 
 $$
 \begin{aligned} 
-v^* = \max_{\pi \in \Pi} \left( r_{\pi} + \gamma P_{\pi} v^* \right), \quad v^* \in \mathbb{R}^{|\mathcal{S}|},\ P_{\pi} \in \mathbb{R}^{|\mathcal{S}| \times |\mathcal{S}|} \qquad (2) 
+v^* = \max_{\pi \in \Pi} \left( r_{\pi} + \gamma P_{\pi} v^* \right), \quad v^*, r_{\pi} \in \mathbb{R}^{|\mathcal{S}|},\ P_{\pi} \in \mathbb{R}^{|\mathcal{S}| \times |\mathcal{S}|} \qquad (2) 
 \end{aligned}
 $$
 
@@ -42,7 +42,7 @@ $$
 
 $$
 \begin{aligned} 
-R(s,a) \doteq \sum_{r \in \mathcal{R}} p(r|s,a) r, \quad P(s'|s,a) \doteq p(s'|s,a)
+[R]_{s,a} \doteq \sum_{r \in \mathcal{R}} p(r|s,a) r, \quad [P]_{(s,a),s'} \doteq p(s'|s,a)
 \end{aligned}
 $$
 
