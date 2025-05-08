@@ -5,18 +5,18 @@ def check_if_movement_is_valid(
         current_state: Tuple[int, int], 
         next_state: Tuple[int, int], 
         action: str,
-        grid_height:int,
-        grid_width:int 
+        grid_height: int,
+        grid_width: int 
         ) -> bool:
     """
     Checks if the movement from the current state to the next state is valid based on the action taken.
 
     Args:
-        current_state (Tuple[int, int]): The current position in the grid as (row, column).
-        next_state (Tuple[int, int]): The intended next position in the grid as (row, column).
-        action (str): The action taken, one of 'up', 'down', 'left', or 'right'.
-        grid_height (int): Height of the grid.
-        grid_width (int): Width of the grid.
+        current_state: The current position in the grid as (row, column).
+        next_state: The intended next position in the grid as (row, column).
+        action: The action taken, one of 'up', 'down', 'left', or 'right'.
+        grid_height: Height of the grid.
+        grid_width: Width of the grid.
 
     Returns:
         bool: True if the movement is valid, False otherwise.
@@ -50,18 +50,18 @@ def transition_probability(
         current_state: Tuple[int, int], 
         action: str, 
         next_state: Tuple[int, int],
-        grid_height:int,
-        grid_width:int
+        grid_height: int,
+        grid_width: int
         ) -> float:
     """
     Calculate the transition probability from current_state to next_state given an action.
 
     Args:
-        current_state (Tuple[int, int]): The current position in the grid as (row, column).
-        action (str): The action taken, one of 'up', 'down', 'left', or 'right'.
-        next_state (Tuple[int, int]): The intended next position in the grid as (row, column).
-        grid_height (int): Height of the grid.
-        grid_width (int): Width of the grid.
+        current_state: The current position in the grid as (row, column).
+        action: The action taken, one of 'up', 'down', 'left', or 'right'.
+        next_state: The intended next position in the grid as (row, column).
+        grid_height: Height of the grid.
+        grid_width: Width of the grid.
 
     Returns:
         float: Transition probability.
@@ -74,7 +74,7 @@ def transition_probability(
 def reward_probability(
         current_state: Tuple[int, int],
         forbidden_states: List[Tuple[int, int]],
-        goal_state: Tuple[int, int],
+        goal_state: List[Tuple[int, int]],
         grid_width: int,
         grid_height: int, 
         action: str, 
@@ -84,19 +84,20 @@ def reward_probability(
     Calculate the probability of receiving a specific reward given the current state and action.
 
     Args:
-        current_state (Tuple[int, int]): The current position in the grid as (row, column).
-        forbidden_states (List[Tuple[int, int]]): List of forbidden states.
-        goal_state (Tuple[int, int]): The goal state.
-        grid_width (int): Width of the grid.
-        grid_height (int): Height of the grid.
-        action (str): The action taken, one of 'up', 'down', 'left', or 'right'.
-        reward (str): The type of reward, one of 'forbidden', 'goal', 'boundary', or 'default'.
+        current_state: The current position in the grid as (row, column).
+        forbidden_states: List of forbidden states.
+        goal_state: The goal state.
+        grid_width: Width of the grid.
+        grid_height: Height of the grid.
+        action: The action taken, one of 'up', 'down', 'left', or 'right'.
+        reward: The type of reward, one of 'forbidden', 'goal', 'boundary', or 'default'.
 
     Returns:
         float: Probability of receiving the specified reward (1.0 if valid, 0.0 otherwise).
     """
 
     forbidden_states = set(forbidden_states)  # Convert to set for faster lookup
+    goal_state = set(goal_state)  # Convert to set for faster lookup
 
     # Define the expected movement for each action
     action_deltas = {
@@ -119,11 +120,11 @@ def reward_probability(
     # Check conditions for each reward type
     if reward == 'forbidden' and is_forbidden_state:
         return 1.0
-    if reward == 'goal' and next_state == goal_state:
+    if reward == 'goal' and next_state in goal_state:
         return 1.0
     if reward == 'boundary' and is_crossing_boundary:
         return 1.0
-    if reward == 'default' and not is_crossing_boundary and not is_forbidden_state and next_state != goal_state:
+    if reward == 'default' and not is_crossing_boundary and not is_forbidden_state and next_state not in goal_state:
         return 1.0
 
     return 0.0
@@ -138,7 +139,7 @@ def policy_iteration(
         grid_width: int,
         grid_height: int,
         forbidden_states: List[Tuple[int, int]],
-        goal_state: Tuple[int, int],
+        goal_state: List[Tuple[int, int]],
         gamma: float, 
         max_policy_eval_error: float,
         max_policy_eval_iter: int,
@@ -152,26 +153,26 @@ def policy_iteration(
     Markov Decision Process (MDP).
     
     Args:
-        all_states (List[Tuple[int, int]]): A list of all possible states in the grid.
-        value_states (Dict[Tuple[int, int], float]): A dictionary mapping each state to its 
+        all_states: A list of all possible states in the grid.
+        value_states: A dictionary mapping each state to its 
             current estimated value.
-        policy (Dict[Tuple[int, int], str]): A dictionary mapping each state to its current 
+        policy: A dictionary mapping each state to its current 
             policy (action to take in that state).
-        actions (List[str]): A list of all possible actions.
-        rewards (Dict[str, int]): A dictionary mapping reward keys to their corresponding 
+        actions: A list of all possible actions.
+        rewards: A dictionary mapping reward keys to their corresponding 
             reward values.
-        grid_width (int): The width of the grid.
-        grid_height (int): The height of the grid.
-        forbidden_states (List[Tuple[int, int]]): A list of states that are not allowed 
+        grid_width: The width of the grid.
+        grid_height: The height of the grid.
+        forbidden_states: A list of states that are not allowed 
             (e.g., obstacles).
-        goal_state (Tuple[int, int]): The goal state in the grid.
-        gamma (float): The discount factor for future rewards (0 <= gamma <= 1).
-        max_policy_eval_error (float): The maximum allowable error for policy evaluation 
+        goal_state: The goal state in the grid.
+        gamma: The discount factor for future rewards (0 <= gamma <= 1).
+        max_policy_eval_error: The maximum allowable error for policy evaluation 
             convergence. If negative, neglect the convergence check.
-        max_policy_eval_iter (int): The maximum number of iterations for policy evaluation.
-        max_policy_iter_error (float): The maximum allowable error for policy iteration 
+        max_policy_eval_iter: The maximum number of iterations for policy evaluation.
+        max_policy_iter_error: The maximum allowable error for policy iteration 
             convergence. If negative, neglect the convergence check.
-        max_policy_iter_loop (int): The maximum number of iterations for policy improvement.
+        max_policy_iter_loop: The maximum number of iterations for policy improvement.
     
     Returns:
         Tuple[Dict[Tuple[int, int], float], Dict[Tuple[int, int], str]]:
@@ -289,13 +290,15 @@ if __name__ == "__main__":
     # This effectively enumerates all grid cells in the environment.
     STATES = [(i, j) for i in range(1,GRID_HEIGHT+1) for j in range(1,GRID_WIDTH+1)]
     FORBIDDEN_STATES = [(2, 2), (2, 3), (3, 3), (4,2), (4,4), (5,2)]
-    GOAL_STATE = (4, 3)
+    GOAL_STATES = [(4, 3)]
 
     VALUE_STATES = {state: 0.0 for state in STATES}  # Initialize value function for all states to 0.0
     for forbidden_state in FORBIDDEN_STATES:
         VALUE_STATES[forbidden_state] = -100  # Assign a negative value to forbidden states 
-    VALUE_STATES[GOAL_STATE] = 10  # Assign a high value to the goal state
-
+    for goal_state in GOAL_STATES:
+        # Assign a high value to the goal state
+        VALUE_STATES[goal_state] = 10
+    
     POLICY = {state: 'stay' for state in STATES}  # Initialize policy to 'stay' for all states
 
     REWARDS = {'boundary': -1, 'forbidden':-10, 'goal': 1, 'default': 0}  # Example rewards
@@ -316,7 +319,7 @@ if __name__ == "__main__":
         GRID_WIDTH,
         GRID_HEIGHT,
         FORBIDDEN_STATES,
-        GOAL_STATE,
+        GOAL_STATES,
         GAMMA, 
         MAX_POLICY_EVAL_ERROR,
         MAX_POLICY_EVAL_ITER,
