@@ -33,7 +33,7 @@ class GridWorldPolicyIteration:
                          max_policy_iter_error, max_policy_iter_loop):
             Performs policy iteration to find the optimal policy and value function for the grid world.
     """
-    
+
     def __init__(self, 
                  grid_width: int, 
                  grid_height: int,
@@ -260,10 +260,8 @@ class GridWorldPolicyIteration:
                 return sum(self.reward_probability(state, action, reward_key) * self.rewards[reward_key] 
                         for reward_key in self.rewards)
         
-        # Create a mapping of actions and states to indices for easier access
+        # Create a mapping of actions to indices for easier access
         actions_indices = {action: i for i, action in enumerate(self.actions)}
-
-        states_indices = {state: i for i, state in enumerate(self.all_states)}
         
         # [R]_{s,a} \doteq \sum_{r \in \mathcal{R}} p(r|s,a) r
         # where R is the reward matrix, s is the current state, a is the action taken, and r is the reward.
@@ -272,21 +270,20 @@ class GridWorldPolicyIteration:
         # R[0][1] = r(s0,a1)
         # R[1][0] = r(s1,a0)
         # R[1][1] = r(s1,a1)
-        rewards_matrix = [[sum_of_rewards(state, action) for action in self.actions] 
-                                for state in self.all_states]
+        rewards_matrix = np.array([[sum_of_rewards(state, action) for action in self.actions] 
+                                for state in self.all_states])
         
-        rewards_vector = np.array(rewards_matrix).flatten()
+        rewards_vector = rewards_matrix.flatten()
         
         # [P]_{s,a,s'} \doteq p(s'|s,a) a 3D matrix 
         # where P is the transition probability matrix, s is the current state, a is the action taken, and s' is the next state.
+        #  (3D: state, action, next_state)
         transition_probability_tensor = np.array([
-            [
-                [self.transition_probability(state, action, next_state) 
-                for action in self.actions]
-                for next_state in self.all_states
-            ] 
+            [self.transition_probability(state, action, next_state)
+                for next_state in self.all_states]
             for state in self.all_states
-        ])
+            for action in self.actions
+        ]).reshape(len(self.all_states), len(self.actions), len(self.all_states))
 
         # [P]_{(s,a),s'} \doteq p(s'|s,a) a 2D matrix
         # where P is the transition probability matrix, (s,a) is the current state-action pair, and s' is the next state.
@@ -299,27 +296,24 @@ class GridWorldPolicyIteration:
         # P[2][1] = p(s1|s1,a0)
         # P[3][0] = p(s0|s1,a1)
         # P[3][1] = p(s1|s1,a1)
-        # Reorder axes: (state, action, next_state) instead of (state, next_state, action)
-        transition_probability_matrix = transition_probability_tensor.transpose(0, 2, 1)
-        # Reshape to 2D: (num_states * num_actions, num_next_states)
-        transition_probability_matrix = transition_probability_matrix.reshape(-1, transition_probability_tensor.shape[1])
+        # Reshape the tensor to a 2D matrix for easier access (2D: (state*action) x next_state)
+        transition_probability_matrix = transition_probability_tensor.reshape(-1, len(self.all_states))
 
         value_states_vector = np.array([value_states[state] for state in self.all_states])
         
         for _ in range(max_policy_iter_loop):
+            # Get policy actions for all states (vectorized)
+            policy_actions = np.array([actions_indices[policy[state]] for state in self.all_states])
+
+            # Get transition probabilities for the current policy (vectorized)
+            P_pi = transition_probability_tensor[np.arange(len(self.all_states)), policy_actions, :]
+
+            # Get rewards for the current policy (vectorized)
+            r_pi = rewards_matrix[np.arange(len(self.all_states)), policy_actions]
+
             # Policy evaluation
             # evaluate the current policy until convergence
             for _ in range(max_policy_eval_iter):
-                r_pi = np.array([rewards_matrix[states_indices[state]][actions_indices[policy[state]]] for state in self.all_states])
-
-                P_pi = np.array([
-                    [
-                    transition_probability_tensor[states_indices[state]][states_indices[next_state]][actions_indices[policy[state]]]
-                    for next_state in self.all_states
-                    ]
-                    for state in self.all_states
-                ])
-                
                 new_value_states_vector = r_pi + gamma * P_pi @ value_states_vector
                 # check for convergence
                 delta = np.max(np.abs(new_value_states_vector - value_states_vector))
