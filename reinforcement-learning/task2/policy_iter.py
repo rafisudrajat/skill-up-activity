@@ -50,7 +50,7 @@ if __name__ == "__main__":
         policy=POLICY,
         gamma=GAMMA,
         max_policy_eval_error=MAX_POLICY_EVAL_ERROR,
-        max_policy_eval_iter=MAX_POLICY_EVAL_ITER,
+        max_policy_eval_loop=MAX_POLICY_EVAL_ITER,
         max_policy_iter_error=MAX_POLICY_ITER_ERROR,
         max_policy_iter_loop=MAX_POLICY_ITER_LOOP
     )

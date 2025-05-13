@@ -24,18 +24,11 @@ class GridWorldMDP:
             Initializes the grid world environment with the specified dimensions, states, actions, and rewards.
         plot_grid_world():
             Draws a visual representation of the grid world, highlighting forbidden and goal states.
-        check_if_movement_is_valid(current_state, next_state, action):
-        transition_probability(current_state, action, next_state):
-            Calculates the transition probability from the current state to the next state given an action.
-        reward_probability(current_state, action, reward):
-            Calculates the probability of receiving a specific reward given the current state and action.
         policy_iteration(value_states, policy, gamma, max_policy_eval_error, max_policy_eval_iter, 
                          max_policy_iter_error, max_policy_iter_loop):
             Performs policy iteration to find the optimal policy and value function for the grid world.
         value_iteration(value_states, gamma, max_error, max_iter):
             Performs value iteration to compute the optimal value function and policy for the grid world.
-        sum_of_rewards(state, action):
-            Calculates the sum of rewards weighted by their probabilities for a given state and action.
     """
 
     def __init__(
@@ -112,120 +105,6 @@ class GridWorldMDP:
 
         plt.show()
 
-    def check_if_movement_is_valid(
-        self,
-        current_state: Tuple[int, int], 
-        next_state: Tuple[int, int], 
-        action: str, 
-        ) -> bool:
-        """
-        Checks if the movement from the current state to the next state is valid based on the action taken.
-
-        Args:
-            current_state: The current position in the grid as (row, column).
-            next_state: The intended next position in the grid as (row, column).
-            action: The action taken, one of 'up', 'down', 'left', or 'right'.
-
-        Returns:
-            bool: True if the movement is valid, False otherwise.
-        """
-        # Define the expected movement for each action
-        action_deltas = {
-            'up': (-1, 0),
-            'down': (1, 0),
-            'left': (0, -1),
-            'right': (0, 1),
-            'stay': (0, 0)
-        }
-
-        # Calculate the expected next state
-        expected_next_state = (
-            current_state[0] + action_deltas[action][0],
-            current_state[1] + action_deltas[action][1]
-        )
-
-        # Check for boundary conditions
-        if not (1 <= expected_next_state[0] <= self.grid_height and 1 <= expected_next_state[1] <= self.grid_width):
-            expected_next_state = current_state  # Movement is invalid, stay in the same state
-
-        # Return whether the actual next state matches the expected next state
-        return next_state == expected_next_state
-
-    # Define transtion probabilities for each state and action pair p(s'|s,a) = 1.0 
-    # if the action is valid and leads to the next state (deterministic transition), otherwise 0.0
-    def transition_probability(
-            self,
-            current_state: Tuple[int, int], 
-            action: str, 
-            next_state: Tuple[int, int]
-            ) -> float:
-        """
-        Calculate the transition probability from current_state to next_state given an action.
-
-        Args:
-            current_state: The current position in the grid as (row, column).
-            action: The action taken, one of 'up', 'down', 'left', or 'right'.
-            next_state: The intended next position in the grid as (row, column).
-
-        Returns:
-            float: Transition probability.
-        """
-        if self.check_if_movement_is_valid(current_state, next_state, action):
-            return 1.0  # Valid movement
-        else:
-            return 0.0  # Invalid movement
-    
-    def reward_probability(
-            self,
-            current_state: Tuple[int, int],
-            action: str, 
-            reward: str
-            ) -> float:
-        """
-        Calculate the probability of receiving a specific reward given the current state and action.
-
-        Args:
-            current_state: The current position in the grid as (row, column).
-            action: The action taken, one of 'up', 'down', 'left', or 'right'.
-            reward: The type of reward, one of 'forbidden', 'goal', 'boundary', or 'default'.
-
-        Returns:
-            float: Probability of receiving the specified reward (1.0 if valid, 0.0 otherwise).
-        """
-
-        forbidden_states = set(self.forbidden_states)  # Convert to set for faster lookup
-        goal_states = set(self.goal_states)  # Convert to set for faster lookup
-
-        # Define the expected movement for each action
-        action_deltas = {
-            'up': (-1, 0),
-            'down': (1, 0),
-            'left': (0, -1),
-            'right': (0, 1),
-            'stay': (0, 0)
-        }
-
-        # Calculate the expected next state
-        next_state = (
-            current_state[0] + action_deltas[action][0],
-            current_state[1] + action_deltas[action][1]
-        )
-
-        is_crossing_boundary = not (1 <= next_state[0] <= self.grid_height and 1 <= next_state[1] <= self.grid_width)
-        is_forbidden_state = next_state in forbidden_states
-
-        # Check conditions for each reward type
-        if reward == 'forbidden' and is_forbidden_state:
-            return 1.0
-        if reward == 'goal' and next_state in goal_states:
-            return 1.0
-        if reward == 'boundary' and is_crossing_boundary:
-            return 1.0
-        if reward == 'default' and not is_crossing_boundary and not is_forbidden_state and next_state not in goal_states:
-            return 1.0
-
-        return 0.0
-
     def policy_iteration(
             self,
             value_states: Dict[Tuple[int, int], float],
@@ -271,7 +150,7 @@ class GridWorldMDP:
         # R[0][1] = r(s0,a1)
         # R[1][0] = r(s1,a0)
         # R[1][1] = r(s1,a1)
-        rewards_matrix = np.array([[self.sum_of_rewards(state, action) for action in self.actions] 
+        rewards_matrix = np.array([[self.__sum_of_rewards(state, action) for action in self.actions] 
                                 for state in self.all_states])
         
         rewards_vector = rewards_matrix.flatten()
@@ -280,7 +159,7 @@ class GridWorldMDP:
         # where P is the transition probability matrix, s is the current state, a is the action taken, and s' is the next state.
         #  (3D: state, action, next_state)
         transition_probability_tensor = np.array([
-            [self.transition_probability(state, action, next_state)
+            [self.__transition_probability(state, action, next_state)
                 for next_state in self.all_states]
             for state in self.all_states
             for action in self.actions
@@ -383,7 +262,7 @@ class GridWorldMDP:
         # P[2][1] = p(s1|s1,a0)
         # P[3][0] = p(s0|s1,a1)
         # P[3][1] = p(s1|s1,a1)
-        transition_probability_matrix = np.array([[self.transition_probability(state, action, next_state) for next_state in self.all_states] 
+        transition_probability_matrix = np.array([[self.__transition_probability(state, action, next_state) for next_state in self.all_states] 
             for state in self.all_states for action in self.actions])
         
         # [R]_{s,a} \doteq \sum_{r \in \mathcal{R}} p(r|s,a) r
@@ -393,7 +272,7 @@ class GridWorldMDP:
         # R[0][1] = r(s0,a1)
         # R[1][0] = r(s1,a0)
         # R[1][1] = r(s1,a1)
-        rewards_matrix = np.array([[self.sum_of_rewards(state, action) for action in self.actions] 
+        rewards_matrix = np.array([[self.__sum_of_rewards(state, action) for action in self.actions] 
                                 for state in self.all_states])
         
         rewards_vector = rewards_matrix.flatten()
@@ -413,8 +292,122 @@ class GridWorldMDP:
             if np.max(np.abs(np.array(list(value_states.values())) - value_states_vector)) < max_error:
                 break
         return value_states, policies
+    
+    def __check_if_movement_is_valid(
+        self,
+        current_state: Tuple[int, int], 
+        next_state: Tuple[int, int], 
+        action: str, 
+        ) -> bool:
+        """
+        Checks if the movement from the current state to the next state is valid based on the action taken.
 
-    def sum_of_rewards(self, state: Tuple[int, int], action: str) -> float:
+        Args:
+            current_state: The current position in the grid as (row, column).
+            next_state: The intended next position in the grid as (row, column).
+            action: The action taken, one of 'up', 'down', 'left', or 'right'.
+
+        Returns:
+            bool: True if the movement is valid, False otherwise.
+        """
+        # Define the expected movement for each action
+        action_deltas = {
+            'up': (-1, 0),
+            'down': (1, 0),
+            'left': (0, -1),
+            'right': (0, 1),
+            'stay': (0, 0)
+        }
+
+        # Calculate the expected next state
+        expected_next_state = (
+            current_state[0] + action_deltas[action][0],
+            current_state[1] + action_deltas[action][1]
+        )
+
+        # Check for boundary conditions
+        if not (1 <= expected_next_state[0] <= self.grid_height and 1 <= expected_next_state[1] <= self.grid_width):
+            expected_next_state = current_state  # Movement is invalid, stay in the same state
+
+        # Return whether the actual next state matches the expected next state
+        return next_state == expected_next_state
+
+    # Define transtion probabilities for each state and action pair p(s'|s,a) = 1.0 
+    # if the action is valid and leads to the next state (deterministic transition), otherwise 0.0
+    def __transition_probability(
+            self,
+            current_state: Tuple[int, int], 
+            action: str, 
+            next_state: Tuple[int, int]
+            ) -> float:
+        """
+        Calculate the transition probability from current_state to next_state given an action.
+
+        Args:
+            current_state: The current position in the grid as (row, column).
+            action: The action taken, one of 'up', 'down', 'left', or 'right'.
+            next_state: The intended next position in the grid as (row, column).
+
+        Returns:
+            float: Transition probability.
+        """
+        if self.__check_if_movement_is_valid(current_state, next_state, action):
+            return 1.0  # Valid movement
+        else:
+            return 0.0  # Invalid movement
+    
+    def __reward_probability(
+            self,
+            current_state: Tuple[int, int],
+            action: str, 
+            reward: str
+            ) -> float:
+        """
+        Calculate the probability of receiving a specific reward given the current state and action.
+
+        Args:
+            current_state: The current position in the grid as (row, column).
+            action: The action taken, one of 'up', 'down', 'left', or 'right'.
+            reward: The type of reward, one of 'forbidden', 'goal', 'boundary', or 'default'.
+
+        Returns:
+            float: Probability of receiving the specified reward (1.0 if valid, 0.0 otherwise).
+        """
+
+        forbidden_states = set(self.forbidden_states)  # Convert to set for faster lookup
+        goal_states = set(self.goal_states)  # Convert to set for faster lookup
+
+        # Define the expected movement for each action
+        action_deltas = {
+            'up': (-1, 0),
+            'down': (1, 0),
+            'left': (0, -1),
+            'right': (0, 1),
+            'stay': (0, 0)
+        }
+
+        # Calculate the expected next state
+        next_state = (
+            current_state[0] + action_deltas[action][0],
+            current_state[1] + action_deltas[action][1]
+        )
+
+        is_crossing_boundary = not (1 <= next_state[0] <= self.grid_height and 1 <= next_state[1] <= self.grid_width)
+        is_forbidden_state = next_state in forbidden_states
+
+        # Check conditions for each reward type
+        if reward == 'forbidden' and is_forbidden_state:
+            return 1.0
+        if reward == 'goal' and next_state in goal_states:
+            return 1.0
+        if reward == 'boundary' and is_crossing_boundary:
+            return 1.0
+        if reward == 'default' and not is_crossing_boundary and not is_forbidden_state and next_state not in goal_states:
+            return 1.0
+
+        return 0.0
+
+    def __sum_of_rewards(self, state: Tuple[int, int], action: str) -> float:
         '''
         Calculate the sum of rewards weighted by their probabilities for a given state and action.
         
@@ -425,6 +418,6 @@ class GridWorldMDP:
         Returns:
             float: The sum of rewards weighted by their probabilities.
         '''     
-        return sum(self.reward_probability(state, action, reward_key) * self.rewards[reward_key] 
+        return sum(self.__reward_probability(state, action, reward_key) * self.rewards[reward_key] 
             for reward_key in self.rewards)
     
