@@ -1,0 +1,1 @@
+Cohere Labs Reinforcement Learning Beginners in Research (BIRDS) Cohort
