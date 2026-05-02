@@ -63,8 +63,8 @@ for episode in range(num_episodes):
         # Choose A' from S'
         next_action: int = choose_action(next_state, Q, epsilon, env)
         
-        # delta <- R + gamma * Q(S', A') - Q(S, A)
-        td_target: float = float(reward) + gamma * Q[next_state, next_action]
+        # delta <- R + gamma * Q(S', A') - Q(S, A)  [Q(S', A') = 0 if S' is terminal]
+        td_target: float = float(reward) if terminated else float(reward) + gamma * Q[next_state, next_action]
         delta: float = td_target - Q[state, action]
         
         # E(S, A) <- E(S, A) + 1 (Accumulating trace)

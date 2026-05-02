@@ -59,7 +59,7 @@ for episode in range(num_episodes):
         # Q-Learning Update: Q(S, A) <- Q(S, A) + alpha * [R + gamma * max_a Q(S', a) - Q(S, A)]
         # We find the maximum Q-value for the next state (Off-policy learning)
         best_next_action: int = int(np.argmax(Q[next_state, :]))
-        td_target: float = float(reward) + gamma * Q[next_state, best_next_action]
+        td_target: float = float(reward) if terminated else float(reward) + gamma * Q[next_state, best_next_action]
         delta: float = td_target - Q[state, action]
         
         Q[state, action] += alpha * delta
